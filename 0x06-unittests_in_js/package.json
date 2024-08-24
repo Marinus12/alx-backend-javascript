@@ -6,13 +6,9 @@
   "scripts": {
     "test": "mocha"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
-    "mocha": "^10.0.0"
+    "mocha": "^10.7.3"
   },
-  "dependencies": {
-    "chai": "^4.2.0",
-    "sinon": "^9.2.4"
-  }
+  "author": "",
+  "license": "ISC"
 }
