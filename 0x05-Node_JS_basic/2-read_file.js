@@ -8,31 +8,34 @@ function countStudents(path) {
       throw new Error('Cannot load the database');
     }
 
-    const lines = data.split('\n');
-    const header = lines[0].split(','); // Split header to get the fields
+    const lines = data.split('\n').filter((line) => line.trim() !== ''); // Remove empty lines
+    if (lines.length === 0) {
+      console.log('Number of students: 0');
+      return;
+    }
 
-    const studentCount = lines.slice(1).filter(line => line).length;
-    console.log(`Number of students: ${studentCount}`);
+    const students = lines.slice(1); // Skip the header row
 
     const fields = {};
-    lines.slice(1).forEach(line => {
-      if (line) { // Skip empty lines
-        const values = line.split(',');
-        const field = values[3]; // Assuming the 4th column is the field
-        const firstName = values[0]; // Assuming the 1st column is the first name
+    students.forEach((line) => {
+      const values = line.split(',');
+      const firstName = values[0];
+      const field = values[3]; // Assuming the 4th column is the field
 
-        if (!fields[field]) {
-          fields[field] = [];
-        }
-        fields[field].push(firstName);
+      if (!fields[field]) {
+        fields[field] = [];
       }
+      fields[field].push(firstName);
     });
 
-    for (const [field, students] of Object.entries(fields)) {
-      console.log(`Number of students in ${field}: ${students.length}. List: ${students.join(', ')}`);
+    const numberOfStudents = students.length;
+    console.log(`Number of students: ${numberOfStudents}`);
+
+    for (const [field, names] of Object.entries(fields)) {
+      console.log(`Number of students in ${field}: ${names.length}. List: ${names.join(', ')}`);
     }
   } catch (error) {
-    throw new Error('Cannot load the database');
+    console.error('Cannot load the database');
   }
 }
 

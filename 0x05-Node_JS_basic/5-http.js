@@ -1,75 +1,53 @@
 const http = require('http');
-const fs = require('fs').promises;
-const path = require('path');
+const fs = require('fs');
+const countStudents = require('./3-read_file_async'); // Import the function from 3-read_file_async.js
 
-const PORT = 1245;
+// Retrieve the database file path from command-line arguments
+const databasePath = process.argv[2];
 
-const app = http.createServer(async (req, res) => {
-  try {
+// Create an HTTP server
+const app = http.createServer((req, res) => {
+  if (req.method === 'GET') {
     if (req.url === '/') {
-      // Handle the root path
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/plain');
+      // Handle root path
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
       res.end('Hello Holberton School!\n');
     } else if (req.url === '/students') {
-      // Handle the /students path
-      const databasePath = process.argv[2];
-      if (!databasePath) {
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('Error: Database file path not provided\n');
-        return;
-      }
+      // Handle /students path
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
 
-      try {
-        const data = await fs.readFile(databasePath, 'utf-8');
-        const lines = data.trim().split('\n');
-        if (lines.length === 0) throw new Error('Cannot load the database');
-
-        let result = 'This is the list of our students\n';
-        result += `Number of students: ${lines.length - 1}\n`;
-
-        const fields = {};
-        lines.slice(1).forEach((line) => {
-          if (line) {
-            const values = line.split(',');
-            const field = values[3];
-            const firstName = values[0];
-
-            if (!fields[field]) {
-              fields[field] = [];
-            }
-            fields[field].push(firstName);
-          }
-        });
-
-        for (const [field, students] of Object.entries(fields)) {
-          result += `Number of students in ${field}: ${students.length}. List: ${students.join(', ')}\n`;
-        }
-
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(result);
-      } catch (err) {
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
+      // Check if the database file is provided and exists
+      if (databasePath && fs.existsSync(databasePath)) {
+        countStudents(databasePath)
+          .then(() => {
+            // Output the student data
+            res.end();
+          })
+          .catch(() => {
+            // Error handling
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Cannot load the database\n');
+          });
+      } else {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
         res.end('Cannot load the database\n');
       }
     } else {
-      // Handle other paths
-      res.statusCode = 404;
-      res.setHeader('Content-Type', 'text/plain');
+      // Handle unknown paths
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('Not Found\n');
     }
-  } catch (err) {
-    res.statusCode = 500;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('Internal Server Error\n');
+  } else {
+    // Handle non-GET methods
+    res.writeHead(405, { 'Content-Type': 'text/plain' });
+    res.end('Method Not Allowed\n');
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
+// Make the server listen on port 1245
+app.listen(1245, () => {
+  console.log('Server is listening on port 1245');
 });
 
+// Export the server instance
 module.exports = app;
