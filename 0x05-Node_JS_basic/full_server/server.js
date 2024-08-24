@@ -4,11 +4,10 @@ import routes from './routes/index.js';
 const app = express();
 const PORT = 1245;
 
-app.use(express.text());
-app.use('/', routes);
+app.use(routes);
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
+  console.log(`Server is listening on port ${PORT}`);
 });
 
 export default app;
